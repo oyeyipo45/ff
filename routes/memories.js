@@ -44,6 +44,26 @@ router.get("/", ensureAuth, async (req, res) => {
   }
 });
 
+// @desc    Show single memory
+// @route   GET /memories/:id
+
+router.get("/:id", ensureAuth, async (req, res) => {
+  try {
+    let memory = await Memory.findById(req.params.id).populate("user").lean();
+
+    if (!memory) {
+      return res.render("error/404");
+    }
+
+    res.render("memories/show", {
+      memory,
+    });
+  } catch (error) {
+    console.log(error);
+    res.render("error/404");
+  }
+});
+
 // @desc    Show edit page
 // @route   GET /memories/edit/:id
 
@@ -111,6 +131,27 @@ router.delete("/:id", ensureAuth, async (req, res) => {
   } catch (error) {
     console.log(error);
     return res.render("error/500");
+  }
+});
+
+// @desc    Show User Memories
+// @route   GET /memories/user/:id
+
+router.get("/user/:userId", ensureAuth, async (req, res) => {
+  try {
+    let memories = await Memory.find({
+      user: req.params.userId,
+      status: 'public',
+    })
+      .populate("user")
+      .lean();
+
+    res.render("memories/index", {
+      memories,
+    });
+  } catch (error) {
+    console.log(error);
+    res.render("error/404");
   }
 });
 
